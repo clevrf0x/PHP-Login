@@ -3,7 +3,8 @@
   if(!isset($_SESSION['user'])) {
     header('Location: /registration');
     exit;
-  } else {
+  } 
+  else {
     $user_id = $_SESSION['id'];
     $sql = "SELECT * FROM users WHERE id = '$user_id'";
     $result = mysqli_query($conn, $sql);

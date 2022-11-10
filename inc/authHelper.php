@@ -1,6 +1,8 @@
 <?php 
   include 'config/database.php'; 
   session_start();
+  
+  define('SALT', 'testsalt');
 
   function hasLoggedin(){
     if(isset($_SESSION['user'])) {
@@ -36,12 +38,18 @@
 
     function authenticate() {
       global $conn;
-      $statement = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-      $statement->bind_param('ss', $this->email, $this->password);
+      $statement = $conn->prepare("SELECT * FROM users WHERE email = ?");
+      $statement->bind_param('s', $this->email);
       $statement->execute();
       $result = $statement->get_result();
       $user = $result->fetch_assoc();
-      return $user;
+
+      $hashed_password = (!empty($user['password'])) ? $user['password'] : '';
+      $user_pass = crypt($this->password, SALT);
+      if($hashed_password == $user_pass) {
+        return $user;
+      }
+      return null;
     }
   }
 
@@ -99,9 +107,12 @@
 
     function registerUser() {
       global $conn;
+  
+      $this->password = crypt($this->password, SALT);
       $statement = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
       $statement->bind_param('sss', $this->name, $this->email, $this->password);
-      return $statement->execute();
+      $status = $statement->execute();
+      return $status;
     }
   }
 ?>

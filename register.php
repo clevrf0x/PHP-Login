@@ -19,10 +19,14 @@
     if($register->hasNoErrors()) {
         $status = $register->registerUser();
         // Authernticate if registration successful
-        if ($status) {
-          $_SESSION['user'] = $email;
-          $_SESSION['id'] = $user['id'];
-          header('Location: dashboard.php');
+        if($status) {
+          $login = new LoginHelper($email, $password);
+          $user = $login->authenticate();
+          if (!empty($user)) {
+            $_SESSION['user'] = $email;
+            $_SESSION['id'] = $user['id'];
+            header('Location: dashboard.php');
+          } 
         }
       } 
       else {
